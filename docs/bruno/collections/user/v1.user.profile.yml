@@ -1,0 +1,25 @@
+info:
+  name: v1.user.profile
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: https://app.lvh.me/v1/user/profile
+  headers:
+    - name: rid
+      value: session
+      disabled: true
+    - name: rid
+      value: anti-csrf
+    - name: st-auth-mode
+      value: header
+      disabled: true
+    - name: st-auth-mode
+      value: cookie
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

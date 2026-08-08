@@ -2,37 +2,38 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 	"runtime/debug"
 	"strings"
 
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/gofiber/fiber/v2"
-	fiberRecover "github.com/gofiber/fiber/v2/middleware/recover"
 )
 
-func buildPanicMessage(ctx *fiber.Ctx, err any) string {
+func buildPanicMessage(r *http.Request, err any) string {
 	var result strings.Builder
 
-	result.WriteString(ctx.IP())
+	result.WriteString(r.RemoteAddr)
 	result.WriteString(" - ")
-	result.WriteString(ctx.Method())
+	result.WriteString(r.Method)
 	result.WriteString(" ")
-	result.WriteString(ctx.OriginalURL())
+	result.WriteString(r.URL.RequestURI())
 	result.WriteString(" PANIC DETECTED: ")
 	fmt.Fprintf(&result, "%v\n%s\n", err, debug.Stack())
 
 	return result.String()
 }
 
-func logPanic(l logger.Interface) func(c *fiber.Ctx, err any) {
-	return func(ctx *fiber.Ctx, err any) {
-		l.Error(buildPanicMessage(ctx, err))
-	}
-}
+func Recovery(l logger.Interface) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if err := recover(); err != nil {
+					l.Error(buildPanicMessage(r, err))
+					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				}
+			}()
 
-func Recovery(l logger.Interface) func(c *fiber.Ctx) error {
-	return fiberRecover.New(fiberRecover.Config{
-		EnableStackTrace:  true,
-		StackTraceHandler: logPanic(l),
-	})
+			next.ServeHTTP(w, r)
+		})
+	}
 }

@@ -3,17 +3,18 @@ package restapi
 import (
 	"net/http"
 
-	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/evrone/go-clean-template/config"
 	_ "github.com/evrone/go-clean-template/docs" // Swagger docs.
 	"github.com/evrone/go-clean-template/internal/controller/restapi/middleware"
 	v1 "github.com/evrone/go-clean-template/internal/controller/restapi/v1"
 	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/pkg/jwt"
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/gofiber/contrib/otelfiber/v2"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/swagger"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
+	"github.com/go-chi/metrics"
+	"github.com/riandyrn/otelchi"
+	"github.com/supertokens/supertokens-golang/supertokens"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 // NewRouter -.
@@ -27,33 +28,49 @@ import (
 //	@securityDefinitions.apikey BearerAuth
 //	@in header
 //	@name Authorization
-func NewRouter(app *fiber.App, cfg *config.Config, t usecase.Translation, u usecase.User, tk usecase.Task, jwtManager *jwt.Manager, l logger.Interface) {
+func NewRouter(r chi.Router, cfg *config.Config, u usecase.User, l logger.Interface) {
 	// Options
-	app.Use(middleware.Logger(l))
-	app.Use(middleware.Recovery(l))
+	r.Use(middleware.Logger(l))
+	r.Use(middleware.Recovery(l))
+
+	// Required by SuperTokens frontend SDK (cookie-based sessions cross-origin).
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{cfg.SuperTokens.WebsiteDomain},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   append([]string{"Content-Type"}, supertokens.GetAllCORSHeaders()...),
+		AllowCredentials: true,
+	}))
+
+	r.Use(supertokens.Middleware)
 
 	// Prometheus metrics
 	if cfg.Metrics.Enabled {
-		prometheus := fiberprometheus.New("my-service-name")
-		prometheus.RegisterAt(app, "/metrics")
-		app.Use(prometheus.Middleware)
+		r.Use(metrics.Collector(metrics.CollectorOpts{
+			Host:  false,
+			Proto: true,
+			Skip: func(r *http.Request) bool {
+				return r.Method == "OPTIONS" || r.URL.Path == "/metrics"
+			},
+		}))
+		r.Handle("/metrics", metrics.Handler())
 	}
 
 	// Swagger
 	if cfg.Swagger.Enabled {
-		app.Get("/swagger/*", swagger.HandlerDefault)
+		r.Get("/swagger/*", httpSwagger.Handler())
 	}
 
 	// K8s probe
-	app.Get("/healthz", func(ctx *fiber.Ctx) error { return ctx.SendStatus(http.StatusOK) })
+	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 
 	// Routers
-	apiV1Group := app.Group("/v1")
-	{
+	r.Route("/v1", func(r chi.Router) {
 		if cfg.Tracing.Enabled {
-			apiV1Group.Use(otelfiber.Middleware())
+			r.Use(otelchi.Middleware("my-service-name", otelchi.WithChiRoutes(r)))
 		}
 
-		v1.NewRoutes(apiV1Group, t, u, tk, jwtManager, l)
-	}
+		v1.NewRoutes(r, u, l)
+	})
 }

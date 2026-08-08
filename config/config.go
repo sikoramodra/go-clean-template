@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -10,17 +9,14 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App     app
-		HTTP    http
-		Log     log
-		PG      pg
-		GRPC    grpc
-		RMQ     rmq
-		NATS    nats
-		JWT     jwt
-		Metrics metrics
-		Swagger swagger
-		Tracing tracing
+		App         app
+		HTTP        http
+		Log         log
+		PG          pg
+		SuperTokens supertokens
+		Metrics     metrics
+		Swagger     swagger
+		Tracing     tracing
 	}
 
 	// App -.
@@ -31,8 +27,7 @@ type (
 
 	// HTTP -.
 	http struct {
-		Port           string `env:"HTTP_PORT,required"`
-		UsePreforkMode bool   `env:"HTTP_USE_PREFORK_MODE" envDefault:"false"`
+		Port string `env:"HTTP_PORT,required"`
 	}
 
 	// Log -.
@@ -46,28 +41,13 @@ type (
 		URL     string `env:"PG_URL,required"`
 	}
 
-	// GRPC -.
-	grpc struct {
-		Port string `env:"GRPC_PORT,required"`
-	}
-
-	// RMQ -.
-	rmq struct {
-		ServerExchange string `env:"RMQ_RPC_SERVER,required"`
-		ClientExchange string `env:"RMQ_RPC_CLIENT,required"`
-		URL            string `env:"RMQ_URL,required"`
-	}
-
-	// NATS -.
-	nats struct {
-		ServerExchange string `env:"NATS_RPC_SERVER,required"`
-		URL            string `env:"NATS_URL,required"`
-	}
-
-	// JWT -.
-	jwt struct {
-		Secret      string        `env:"JWT_SECRET,required"`
-		TokenExpiry time.Duration `env:"JWT_TOKEN_EXPIRY" envDefault:"24h"`
+	// SuperTokens -.
+	supertokens struct {
+		ConnectionURI string `env:"SUPERTOKENS_CONNECTION_URI" env-default:"http://supertokens:3567"`
+		APIKey        string `env:"SUPERTOKENS_API_KEY" env-default:"my5up3rPrIvat3ApiK3y"`
+		AppName       string `env:"SUPERTOKENS_APP_NAME" env-default:"go-clean-template"`
+		APIDomain     string `env:"SUPERTOKENS_API_DOMAIN" env-default:"https://app.lvh.me"`
+		WebsiteDomain string `env:"SUPERTOKENS_WEBSITE_DOMAIN" env-default:"http://localhost:5173"`
 	}
 
 	// Metrics -.

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	sq "github.com/Masterminds/squirrel"
 	"github.com/evrone/go-clean-template/internal/entity"
 	"github.com/evrone/go-clean-template/internal/repo"
 	"github.com/evrone/go-clean-template/pkg/postgres"
@@ -26,16 +25,10 @@ func New(pg *postgres.Postgres) repo.UserRepo {
 
 // Store -.
 func (r *Repo) Store(ctx context.Context, user *entity.User) error {
-	sql, args, err := r.Builder.
-		Insert("users").
-		Columns("id, username, email, password_hash, created_at, updated_at").
-		Values(user.ID, user.Username, user.Email, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("UserRepo - Store - r.Builder: %w", err)
-	}
+	const sql = `INSERT INTO users (id, email, created_at, updated_at)
+		VALUES ($1, $2, $3, $4)`
 
-	_, err = r.Pool.Exec(ctx, sql, args...)
+	_, err := r.Pool.Exec(ctx, sql, user.ID, user.Email, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -59,19 +52,14 @@ func (r *Repo) GetByEmail(ctx context.Context, email string) (entity.User, error
 }
 
 func (r *Repo) getUser(ctx context.Context, column, value string) (entity.User, error) {
-	sql, args, err := r.Builder.
-		Select("id, username, email, password_hash, created_at, updated_at").
-		From("users").
-		Where(sq.Eq{column: value}).
-		ToSql()
-	if err != nil {
-		return entity.User{}, fmt.Errorf("UserRepo - getUser - r.Builder: %w", err)
-	}
+	sql := `SELECT id, email, created_at, updated_at
+		FROM users
+		WHERE ` + column + ` = $1`
 
 	var user entity.User
 
-	err = r.Pool.QueryRow(ctx, sql, args...).
-		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
+	err := r.Pool.QueryRow(ctx, sql, value).
+		Scan(&user.ID, &user.Email, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return entity.User{}, entity.ErrUserNotFound

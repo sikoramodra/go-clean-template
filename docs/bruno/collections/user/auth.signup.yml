@@ -1,0 +1,40 @@
+info:
+  name: auth.signup
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: https://app.lvh.me/auth/signup
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: rid
+      value: emailpassword
+    - name: st-auth-mode
+      value: header
+    - name: st-auth-mode
+      value: cookie
+      disabled: true
+  body:
+    type: json
+    data: |-
+      {
+        "formFields": [
+          {
+            "id": "email",
+            "value": "test123@example.com"
+          },
+          {
+            "id": "password",
+            "value": "Password123!"
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

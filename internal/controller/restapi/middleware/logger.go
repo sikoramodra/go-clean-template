@@ -1,35 +1,55 @@
 package middleware
 
 import (
+	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/gofiber/fiber/v2"
 )
 
-func buildRequestMessage(ctx *fiber.Ctx) string {
+type statusWriter struct {
+	http.ResponseWriter
+	status int
+	size   int
+}
+
+func (sw *statusWriter) WriteHeader(status int) {
+	sw.status = status
+	sw.ResponseWriter.WriteHeader(status)
+}
+
+func (sw *statusWriter) Write(b []byte) (int, error) {
+	size, err := sw.ResponseWriter.Write(b)
+	sw.size += size
+
+	return size, err
+}
+
+func buildRequestMessage(r *http.Request, status, size int) string {
 	var result strings.Builder
 
-	result.WriteString(ctx.IP())
+	result.WriteString(r.RemoteAddr)
 	result.WriteString(" - ")
-	result.WriteString(ctx.Method())
+	result.WriteString(r.Method)
 	result.WriteString(" ")
-	result.WriteString(ctx.OriginalURL())
+	result.WriteString(r.URL.RequestURI())
 	result.WriteString(" - ")
-	result.WriteString(strconv.Itoa(ctx.Response().StatusCode()))
+	result.WriteString(strconv.Itoa(status))
 	result.WriteString(" ")
-	result.WriteString(strconv.Itoa(len(ctx.Response().Body())))
+	result.WriteString(strconv.Itoa(size))
 
 	return result.String()
 }
 
-func Logger(l logger.Interface) func(c *fiber.Ctx) error {
-	return func(ctx *fiber.Ctx) error {
-		err := ctx.Next()
+func Logger(l logger.Interface) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sw := &statusWriter{ResponseWriter: w}
 
-		l.Info("%s", buildRequestMessage(ctx))
+			next.ServeHTTP(sw, r)
 
-		return err
+			l.Info("%s", buildRequestMessage(r, sw.status, sw.size))
+		})
 	}
 }

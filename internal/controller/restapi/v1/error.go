@@ -1,10 +1,12 @@
 package v1
 
 import (
+	"net/http"
+
 	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/response"
-	"github.com/gofiber/fiber/v2"
 )
 
-func errorResponse(ctx *fiber.Ctx, code int, msg string) error {
-	return ctx.Status(code).JSON(response.Error{Error: msg})
+// ErrorResponse -.
+func ErrorResponse(w http.ResponseWriter, code int, msg string) {
+	WriteJSON(w, code, response.Error{Error: msg})
 }

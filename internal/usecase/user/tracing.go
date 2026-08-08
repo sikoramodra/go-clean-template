@@ -37,22 +37,13 @@ func endSpan(span trace.Span, err error) {
 	span.End()
 }
 
-func (u *tracedUseCase) Register(ctx context.Context, username, email, password string) (entity.User, error) {
+func (u *tracedUseCase) Register(ctx context.Context, id, email string) error {
 	ctx, span := startSpan(ctx, "UserUseCase.Register", attribute.String("user.email", email))
 
-	result, err := u.next.Register(ctx, username, email, password)
+	err := u.next.Register(ctx, id, email)
 	endSpan(span, err)
 
-	return result, err
-}
-
-func (u *tracedUseCase) Login(ctx context.Context, email, password string) (string, error) {
-	ctx, span := startSpan(ctx, "UserUseCase.Login", attribute.String("user.email", email))
-
-	result, err := u.next.Login(ctx, email, password)
-	endSpan(span, err)
-
-	return result, err
+	return err
 }
 
 func (u *tracedUseCase) GetUser(ctx context.Context, userID string) (entity.User, error) {

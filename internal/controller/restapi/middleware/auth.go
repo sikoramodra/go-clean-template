@@ -1,39 +1,34 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
-	"strings"
 
-	"github.com/evrone/go-clean-template/pkg/jwt"
-	"github.com/gofiber/fiber/v2"
+	"github.com/supertokens/supertokens-golang/recipe/session"
 )
 
-const _bearerParts = 2
+type ctxKey string
 
-type errorResponse struct {
-	Error string `json:"error"`
+const userIDKey ctxKey = "userID"
+
+func Session() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return session.VerifySession(nil, func(w http.ResponseWriter, r *http.Request) {
+			sess := session.GetSessionFromRequestContext(r.Context())
+			if sess == nil {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), userIDKey, sess.GetUserID())
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
-// Auth returns a JWT authentication middleware for Fiber.
-func Auth(jwtManager *jwt.Manager) func(*fiber.Ctx) error {
-	return func(ctx *fiber.Ctx) error {
-		header := ctx.Get("Authorization")
-		if header == "" {
-			return ctx.Status(http.StatusUnauthorized).JSON(errorResponse{Error: "missing authorization header"})
-		}
+func UserIDFromContext(ctx context.Context) (string, bool) {
+	id, ok := ctx.Value(userIDKey).(string)
 
-		parts := strings.SplitN(header, " ", _bearerParts)
-		if len(parts) != _bearerParts || parts[0] != "Bearer" {
-			return ctx.Status(http.StatusUnauthorized).JSON(errorResponse{Error: "invalid authorization header format"})
-		}
-
-		userID, err := jwtManager.ParseToken(parts[1])
-		if err != nil {
-			return ctx.Status(http.StatusUnauthorized).JSON(errorResponse{Error: "invalid or expired token"})
-		}
-
-		ctx.Locals("userID", userID)
-
-		return ctx.Next()
-	}
+	return id, ok
 }

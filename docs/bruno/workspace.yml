@@ -1,0 +1,12 @@
+opencollection: 1.0.0
+info:
+  name: "go-clean-template"
+  type: workspace
+
+collections:
+  - name: "user"
+    path: "collections/user"
+
+specs:
+
+docs: ''
