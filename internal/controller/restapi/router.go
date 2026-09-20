@@ -3,16 +3,16 @@ package restapi
 import (
 	"net/http"
 
-	"github.com/evrone/go-clean-template/config"
-	_ "github.com/evrone/go-clean-template/docs" // Swagger docs.
-	"github.com/evrone/go-clean-template/internal/controller/restapi/middleware"
-	v1 "github.com/evrone/go-clean-template/internal/controller/restapi/v1"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/metrics"
 	"github.com/riandyrn/otelchi"
+	"github.com/sikoramodra/go-clean-template/config"
+	_ "github.com/sikoramodra/go-clean-template/docs" // Swagger docs.
+	"github.com/sikoramodra/go-clean-template/internal/controller/restapi/middleware"
+	v1 "github.com/sikoramodra/go-clean-template/internal/controller/restapi/v1"
+	"github.com/sikoramodra/go-clean-template/internal/usecase"
+	"github.com/sikoramodra/go-clean-template/pkg/logger"
 	"github.com/supertokens/supertokens-golang/supertokens"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )

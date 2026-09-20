@@ -1,11 +1,11 @@
 package v1
 
 import (
-	"github.com/evrone/go-clean-template/internal/controller/restapi/middleware"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"github.com/sikoramodra/go-clean-template/internal/controller/restapi/middleware"
+	"github.com/sikoramodra/go-clean-template/internal/usecase"
+	"github.com/sikoramodra/go-clean-template/pkg/logger"
 )
 
 // NewRoutes -.

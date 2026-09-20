@@ -3,7 +3,7 @@ package v1
 import (
 	"net/http"
 
-	"github.com/evrone/go-clean-template/internal/controller/restapi/v1/response"
+	"github.com/sikoramodra/go-clean-template/internal/controller/restapi/v1/response"
 )
 
 // ErrorResponse -.

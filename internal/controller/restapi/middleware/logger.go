@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/sikoramodra/go-clean-template/pkg/logger"
 )
 
 type statusWriter struct {

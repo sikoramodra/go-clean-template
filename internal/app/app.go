@@ -8,16 +8,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/evrone/go-clean-template/config"
-	"github.com/evrone/go-clean-template/internal/controller/restapi"
-	persistUserRepo "github.com/evrone/go-clean-template/internal/repo/persistent/user"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/user"
-	"github.com/evrone/go-clean-template/pkg/httpserver"
-	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/evrone/go-clean-template/pkg/postgres"
-	"github.com/evrone/go-clean-template/pkg/supertokens"
-	"github.com/evrone/go-clean-template/pkg/tracing"
+	"github.com/sikoramodra/go-clean-template/config"
+	"github.com/sikoramodra/go-clean-template/internal/controller/restapi"
+	persistUserRepo "github.com/sikoramodra/go-clean-template/internal/repo/persistent/user"
+	"github.com/sikoramodra/go-clean-template/internal/usecase"
+	"github.com/sikoramodra/go-clean-template/internal/usecase/user"
+	"github.com/sikoramodra/go-clean-template/pkg/httpserver"
+	"github.com/sikoramodra/go-clean-template/pkg/logger"
+	"github.com/sikoramodra/go-clean-template/pkg/postgres"
+	"github.com/sikoramodra/go-clean-template/pkg/supertokens"
+	"github.com/sikoramodra/go-clean-template/pkg/tracing"
 )
 
 type useCases struct {

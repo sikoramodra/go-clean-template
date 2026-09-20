@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/evrone/go-clean-template/internal/controller/restapi/middleware"
-	_ "github.com/evrone/go-clean-template/internal/controller/restapi/v1/response"
-	"github.com/evrone/go-clean-template/internal/entity"
+	"github.com/sikoramodra/go-clean-template/internal/controller/restapi/middleware"
+	_ "github.com/sikoramodra/go-clean-template/internal/controller/restapi/v1/response"
+	"github.com/sikoramodra/go-clean-template/internal/entity"
 )
 
 // @Summary     Get profile

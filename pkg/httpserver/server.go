@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/go-chi/chi/v5"
+	"github.com/sikoramodra/go-clean-template/pkg/logger"
 	"golang.org/x/sync/errgroup"
 )
 

@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/internal/repo"
-	"github.com/evrone/go-clean-template/pkg/postgres"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/sikoramodra/go-clean-template/internal/entity"
+	"github.com/sikoramodra/go-clean-template/internal/repo"
+	"github.com/sikoramodra/go-clean-template/pkg/postgres"
 )
 
 // Repo -.

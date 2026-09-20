@@ -6,7 +6,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/sikoramodra/go-clean-template/pkg/logger"
 )
 
 func buildPanicMessage(r *http.Request, err any) string {
