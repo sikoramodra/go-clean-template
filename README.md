@@ -2,7 +2,7 @@
 
 ## TODO:
 
-- check tracing, metrics, swagger+supertokens
+- check swagger+supertokens
 - improve `internal/controller/restapi`
 - fix unit and integration tests
 

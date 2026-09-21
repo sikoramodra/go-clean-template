@@ -135,6 +135,27 @@ services:
         aliases:
           - app.lvh.me
 
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v3.14.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+    networks:
+      app_network:
+        aliases:
+          - prometheus.lvh.me
+
   nginx:
     container_name: nginx
     image: nginx:1.31.3-alpine
@@ -158,3 +179,4 @@ networks:
 volumes:
   db_data:
   st_db_data:
+  prometheus_data:

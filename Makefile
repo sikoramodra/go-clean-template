@@ -64,7 +64,7 @@ run: deps swag-v1 ### swag run for API v1
 .PHONY: run
 
 docker-rm-volume: ### remove docker volume
-	docker volume rm go-clean-template_db_data go-clean-template_st_db_data
+	docker volume rm go-clean-template_db_data go-clean-template_st_db_data go-clean-template_prometheus_data
 .PHONY: docker-rm-volume
 
 linter-golangci: ### check by golangci linter
