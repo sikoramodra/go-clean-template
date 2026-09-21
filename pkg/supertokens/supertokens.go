@@ -1,51 +1,53 @@
+// Package supertokens implements the SuperTokens Go SDK.
 package supertokens
 
 import (
 	"context"
 	"fmt"
+	"net/http"
 
-	"github.com/sikoramodra/go-clean-template/internal/usecase"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword/epmodels"
 	"github.com/supertokens/supertokens-golang/recipe/session"
-	"github.com/supertokens/supertokens-golang/supertokens"
+	st "github.com/supertokens/supertokens-golang/supertokens"
 )
 
 const authPath = "/auth"
 
-// PostSignUpFunc -.
-type PostSignUpFunc func(userID, email string) error
-
-// Config holds SuperTokens configuration.
+// Config - holds SuperTokens configuration.
 type Config struct {
 	ConnectionURI string
 	APIKey        string
 	AppName       string
 	APIDomain     string
 	WebsiteDomain string
-	PostSignUp    PostSignUpFunc
+}
+
+// Hooks - callbacks that let callers react to SuperTokens events.
+type Hooks struct {
+	OnSignUp func(ctx context.Context, userID, email string) error
 }
 
 // New -.
-func New(cfg *Config, u usecase.User) error {
-	conn := &supertokens.ConnectionInfo{ConnectionURI: cfg.ConnectionURI}
+func New(cfg *Config, h Hooks) error {
+	conn := &st.ConnectionInfo{ConnectionURI: cfg.ConnectionURI}
 	if cfg.APIKey != "" {
 		conn.APIKey = cfg.APIKey
 	}
 
 	apiBasePath, webBasePath := authPath, authPath
 
-	err := supertokens.Init(supertokens.TypeInput{
+	err := st.Init(st.TypeInput{
 		Supertokens: conn,
-		AppInfo: supertokens.AppInfo{
+		AppInfo: st.AppInfo{
 			AppName:         cfg.AppName,
 			APIDomain:       cfg.APIDomain,
 			WebsiteDomain:   cfg.WebsiteDomain,
 			APIBasePath:     &apiBasePath,
 			WebsiteBasePath: &webBasePath,
 		},
-		RecipeList: []supertokens.Recipe{
-			emailpassword.Init(withPostSignUp(u)),
+		RecipeList: []st.Recipe{
+			emailpassword.Init(overrideSignUp(h)),
 			session.Init(nil),
 		},
 	})
@@ -56,7 +58,11 @@ func New(cfg *Config, u usecase.User) error {
 	return nil
 }
 
-func withPostSignUp(u usecase.User) *epmodels.TypeInput {
+func overrideSignUp(h Hooks) *epmodels.TypeInput {
+	if h.OnSignUp == nil {
+		return nil
+	}
+
 	return &epmodels.TypeInput{
 		Override: &epmodels.OverrideStruct{
 			APIs: func(orig epmodels.APIInterface) epmodels.APIInterface {
@@ -66,7 +72,7 @@ func withPostSignUp(u usecase.User) *epmodels.TypeInput {
 					formFields []epmodels.TypeFormField,
 					tenantID string,
 					options epmodels.APIOptions,
-					userContext supertokens.UserContext,
+					userContext st.UserContext,
 				) (epmodels.SignUpPOSTResponse, error) {
 					resp, err := originalSignUpPOST(formFields, tenantID, options, userContext)
 					if err != nil || resp.OK == nil {
@@ -75,15 +81,8 @@ func withPostSignUp(u usecase.User) *epmodels.TypeInput {
 
 					ctx := requestContext(userContext)
 
-					if regErr := u.Register(ctx, resp.OK.User.ID, resp.OK.User.Email); regErr != nil {
-						if delErr := supertokens.DeleteUser(resp.OK.User.ID); delErr != nil {
-							return resp, fmt.Errorf(
-								"supertokens - overrideSignUp: register: %w (rollback also failed: %w)",
-								regErr, delErr,
-							)
-						}
-
-						return resp, fmt.Errorf("supertokens - overrideSignUp - userUC.Register: %w", regErr)
+					if hookErr := h.OnSignUp(ctx, resp.OK.User.ID, resp.OK.User.Email); hookErr != nil {
+						return resp, hookErr
 					}
 
 					return resp, nil
@@ -97,11 +96,23 @@ func withPostSignUp(u usecase.User) *epmodels.TypeInput {
 	}
 }
 
-// requestContext pulls the *http.Request's context out of SuperTokens'
-// userContext so downstream calls use the real request context instead of
-// whatever context app.Run happened to be holding at startup.
-func requestContext(userContext supertokens.UserContext) context.Context {
-	if req := supertokens.GetRequestFromUserContext(userContext); req != nil {
+// Middleware -.
+func Middleware(next http.Handler) http.Handler {
+	return st.Middleware(next)
+}
+
+// AllCORSHeaders -.
+func AllCORSHeaders() []string {
+	return st.GetAllCORSHeaders()
+}
+
+// DeleteUser -.
+func DeleteUser(userID string) error {
+	return st.DeleteUser(userID)
+}
+
+func requestContext(userContext st.UserContext) context.Context {
+	if req := st.GetRequestFromUserContext(userContext); req != nil {
 		return req.Context()
 	}
 

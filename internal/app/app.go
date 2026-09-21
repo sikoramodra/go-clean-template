@@ -10,6 +10,7 @@ import (
 
 	"github.com/sikoramodra/go-clean-template/config"
 	"github.com/sikoramodra/go-clean-template/internal/controller/restapi"
+	"github.com/sikoramodra/go-clean-template/internal/controller/restapi/auth"
 	persistUserRepo "github.com/sikoramodra/go-clean-template/internal/repo/persistent/user"
 	"github.com/sikoramodra/go-clean-template/internal/usecase"
 	"github.com/sikoramodra/go-clean-template/internal/usecase/user"
@@ -106,13 +107,15 @@ func Run(cfg *config.Config) {
 	uc := initUseCases(pg)
 
 	// SuperTokens
+	authAdapter := auth.New(uc.user, l)
+
 	if err := supertokens.New(&supertokens.Config{
 		ConnectionURI: cfg.SuperTokens.ConnectionURI,
 		APIKey:        cfg.SuperTokens.APIKey,
 		AppName:       cfg.SuperTokens.AppName,
 		APIDomain:     cfg.SuperTokens.APIDomain,
 		WebsiteDomain: cfg.SuperTokens.WebsiteDomain,
-	}, uc.user); err != nil {
+	}, authAdapter.Hooks()); err != nil {
 		l.Fatal(fmt.Errorf("app - Run - supertokens.New: %w", err))
 	}
 

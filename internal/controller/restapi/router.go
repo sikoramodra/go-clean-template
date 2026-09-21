@@ -13,7 +13,7 @@ import (
 	v1 "github.com/sikoramodra/go-clean-template/internal/controller/restapi/v1"
 	"github.com/sikoramodra/go-clean-template/internal/usecase"
 	"github.com/sikoramodra/go-clean-template/pkg/logger"
-	"github.com/supertokens/supertokens-golang/supertokens"
+	"github.com/sikoramodra/go-clean-template/pkg/supertokens"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
@@ -37,7 +37,7 @@ func NewRouter(r chi.Router, cfg *config.Config, u usecase.User, l logger.Interf
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{cfg.SuperTokens.WebsiteDomain},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   append([]string{"Content-Type"}, supertokens.GetAllCORSHeaders()...),
+		AllowedHeaders:   append([]string{"Content-Type"}, supertokens.AllCORSHeaders()...),
 		AllowCredentials: true,
 	}))
 
