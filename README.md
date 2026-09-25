@@ -2,13 +2,10 @@
 
 ## TODO:
 
-- check swagger+supertokens
 - improve `internal/controller/restapi`
 - fix unit and integration tests
 
 ## After git clone:
-
-1.
 
 ```sh
 make bin-deps

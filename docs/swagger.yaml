@@ -1,5 +1,61 @@
-basePath: /v1
+basePath: /
 definitions:
+  auth.Credentials:
+    properties:
+      formFields:
+        items:
+          $ref: '#/definitions/auth.FormField'
+        type: array
+    type: object
+  auth.FormField:
+    properties:
+      id:
+        example: email
+        type: string
+      value:
+        example: john@example.com
+        type: string
+    type: object
+  auth.SignInResponse:
+    properties:
+      status:
+        example: OK
+        type: string
+      user:
+        $ref: '#/definitions/auth.User'
+    type: object
+  auth.SignOutResponse:
+    properties:
+      status:
+        example: OK
+        type: string
+    type: object
+  auth.SignUpResponse:
+    properties:
+      status:
+        example: OK
+        type: string
+      user:
+        $ref: '#/definitions/auth.User'
+    type: object
+  auth.User:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      tenantIds:
+        example:
+        - public
+        items:
+          type: string
+        type: array
+      timeJoined:
+        example: 1700000000000
+        type: integer
+    type: object
   entity.User:
     properties:
       created_at:
@@ -29,7 +85,78 @@ info:
   title: Go Clean Template API
   version: "1.0"
 paths:
-  /user/profile:
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate with email and password (SuperTokens EmailPassword
+        recipe). On success, an access token is returned in the "st-access-token"
+        response header (or "sAccessToken" cookie) - paste it into the Authorize dialog
+        to call protected endpoints. Served by the SuperTokens SDK middleware, not
+        by this codebase.
+      operationId: authSignIn
+      parameters:
+      - description: Email and password form fields
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignInResponse'
+      summary: Sign in
+      tags:
+      - auth
+  /auth/signout:
+    post:
+      description: Revoke the current session (SuperTokens Session recipe). Served
+        by the SuperTokens SDK middleware, not by this codebase.
+      operationId: authSignOut
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignOutResponse'
+      security:
+      - BearerAuth: []
+      summary: Sign out
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create an account with email and password (SuperTokens EmailPassword
+        recipe). On success, an access token is returned in the "st-access-token"
+        response header (or "sAccessToken" cookie) - paste it into the Authorize dialog
+        to call protected endpoints. Served by the SuperTokens SDK middleware, not
+        by this codebase.
+      operationId: authSignUp
+      parameters:
+      - description: Email and password form fields
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignUpResponse'
+      summary: Sign up
+      tags:
+      - auth
+  /v1/user/profile:
     get:
       description: Get current user profile
       operationId: profile

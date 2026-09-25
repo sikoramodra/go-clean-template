@@ -19,7 +19,7 @@ import (
 // @Failure     404 {object} response.Error
 // @Failure     500 {object} response.Error
 // @Security    BearerAuth
-// @Router      /user/profile [get]
+// @Router      /v1/user/profile [get]
 func (v1 *V1) profile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 

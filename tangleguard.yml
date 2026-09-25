@@ -1,0 +1,39 @@
+rules:
+  - from:
+      workspace_path: ["go-clean-template", "integration-test"]
+    to:
+      workspace_path: ["go-clean-template", "docs"]
+  - from:
+      workspace_path: ["go-clean-template", "integration-test"]
+    to:
+      workspace_path: ["go-clean-template", "pkg"]
+  - from:
+      workspace_path: ["go-clean-template", "internal"]
+    to:
+      workspace_path: ["go-clean-template", "pkg"]
+  - from:
+      workspace_path: ["go-clean-template", "internal"]
+    to:
+      workspace_path: ["go-clean-template", "config"]
+  - from:
+      workspace_path: ["go-clean-template", "cmd"]
+    to:
+      workspace_path: ["go-clean-template", "config"]
+  - from:
+      workspace_path: ["go-clean-template", "internal"]
+    to:
+      workspace_path: ["go-clean-template", "docs"]
+  - from:
+      workspace_path: ["go-clean-template", "pkg"]
+    to:
+      workspace_path: ["go-clean-template", "pkg"]
+    description: go-clean-template::pkg internal dependencies allowed
+  - from:
+      workspace_path: ["go-clean-template", "cmd"]
+    to:
+      workspace_path: ["go-clean-template", "internal", "app"]
+  - from:
+      workspace_path: ["go-clean-template", "internal"]
+    to:
+      workspace_path: ["go-clean-template", "internal"]
+    description: go-clean-template::internal internal dependencies allowed

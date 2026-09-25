@@ -13,9 +13,9 @@ http:
       value: emailpassword
     - name: st-auth-mode
       value: header
+      disabled: true
     - name: st-auth-mode
       value: cookie
-      disabled: true
   body:
     type: json
     data: |-
@@ -38,3 +38,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

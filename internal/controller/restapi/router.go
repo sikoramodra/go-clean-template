@@ -24,10 +24,14 @@ import (
 //	@description Multi-domain clean architecture template with translation, user, and task management
 //	@version     1.0
 //	@host        localhost:8080
-//	@BasePath    /v1
+//	@BasePath    /
 //	@securityDefinitions.apikey BearerAuth
 //	@in header
 //	@name Authorization
+//	@tag.name auth
+//	@tag.description SuperTokens-backed authentication endpoints. Served by the SuperTokens SDK middleware, not by this codebase's Go handlers.
+//	@tag.name user
+//	@tag.description Authenticated user profile endpoints.
 func NewRouter(r chi.Router, cfg *config.Config, u usecase.User, l logger.Interface) {
 	// Options
 	r.Use(middleware.Logger(l))

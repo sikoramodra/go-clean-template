@@ -15,7 +15,103 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/user/profile": {
+        "/auth/signin": {
+            "post": {
+                "description": "Authenticate with email and password (SuperTokens EmailPassword recipe). On success, an access token is returned in the \"st-access-token\" response header (or \"sAccessToken\" cookie) - paste it into the Authorize dialog to call protected endpoints. Served by the SuperTokens SDK middleware, not by this codebase.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in",
+                "operationId": "authSignIn",
+                "parameters": [
+                    {
+                        "description": "Email and password form fields",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignInResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signout": {
+            "post": {
+                "description": "Revoke the current session (SuperTokens Session recipe). Served by the SuperTokens SDK middleware, not by this codebase.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign out",
+                "operationId": "authSignOut",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignOutResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "description": "Create an account with email and password (SuperTokens EmailPassword recipe). On success, an access token is returned in the \"st-access-token\" response header (or \"sAccessToken\" cookie) - paste it into the Authorize dialog to call protected endpoints. Served by the SuperTokens SDK middleware, not by this codebase.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign up",
+                "operationId": "authSignUp",
+                "parameters": [
+                    {
+                        "description": "Email and password form fields",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignUpResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/profile": {
             "get": {
                 "description": "Get current user profile",
                 "produces": [
@@ -61,6 +157,89 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.Credentials": {
+            "type": "object",
+            "properties": {
+                "formFields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth.FormField"
+                    }
+                }
+            }
+        },
+        "auth.FormField": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "email"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "john@example.com"
+                }
+            }
+        },
+        "auth.SignInResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "OK"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth.User"
+                }
+            }
+        },
+        "auth.SignOutResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "auth.SignUpResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "OK"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth.User"
+                }
+            }
+        },
+        "auth.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "tenantIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "public"
+                    ]
+                },
+                "timeJoined": {
+                    "type": "integer",
+                    "example": 1700000000000
+                }
+            }
+        },
         "entity.User": {
             "type": "object",
             "properties": {
@@ -105,7 +284,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/v1",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Go Clean Template API",
 	Description:      "Multi-domain clean architecture template with translation, user, and task management",
